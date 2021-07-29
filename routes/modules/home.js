@@ -3,35 +3,48 @@ const router = express.Router()
 const Url = require('../../models/url')
 const codeGenerator = require('../../tools/codeGenerator')
 
-// router.use(jc)
-
 router.get('/', (req, res) => {
   res.render('index')
 })
 
-router.post('/', (req, res) => {
-  const original = req.body.fullUrl
-  let shorten = 'shorten1'
-  let short = 'short1'
-
-  Url.find()
+router.get('/:shortCode', (req, res) => {
+  const shortCode = req.params.shortCode
+  Url.findOne({ shortCode })
     .lean()
-    .then(() => {
-      let short = ''
-      short = codeGenarator()
+    .then(url => {
+      if (url) {
+        res.redirect(url.originalUrl)
+      } else {
+        res.render('index', { shortCode })
+      }
     })
-
-
-  Url.create({ original, shorten, short })
-
-    .then(() => res.render('index'))
     .catch(error => console.log(error))
 })
 
-function jc(req, res, next) {
-  shortenCode = codeGenerator()
-  console.log('original', shortenCode)
-  next()
-}
+router.post('/', (req, res) => {
+  const originalUrl = req.body.fullUrl
+  const hostUrl = process.env.MAIN_URL || 'http://localhost:3000/'
+
+  Url.find()
+    .lean()
+    .then(allUrls => {
+      //檢查網址是否存在
+      const existUrl = allUrls.filter(eachUrl => eachUrl.originalUrl === originalUrl)
+      if (existUrl.length === 1) {
+        shortCode = existUrl[0].shortCode
+      } else {
+        shortCode = codeGenerator()
+        shortUrl = hostUrl + shortCode
+        //檢查short code 是否存在
+        while (allUrls.some(eachUrl => eachUrl.shortCode === shortCode)) {
+          shortCode = codeGenerator()
+          shortUrl = hostUrl + shortCode
+        }
+        Url.create({ originalUrl, shortUrl, shortCode })
+      }
+    })
+    .then(() => res.render('success', { shortUrl }))
+    .catch(error => console.log(error))
+})
 
 module.exports = router
