@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Url = require('../../models/url')
 const codeGenerator = require('../../tools/codeGenerator')
+const hostUrl = process.env.mainUrl || 'http://localhost:3000/'
 
 router.get('/', (req, res) => {
   res.render('index')
@@ -23,7 +24,6 @@ router.get('/:shortCode', (req, res) => {
 
 router.post('/', (req, res) => {
   const originalUrl = req.body.fullUrl
-  const hostUrl = process.env.MAIN_URL || 'http://localhost:3000/'
 
   Url.find()
     .lean()
