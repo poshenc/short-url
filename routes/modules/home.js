@@ -5,7 +5,6 @@ const codeGenerator = require('../../tools/codeGenerator')
 const hostUrl = process.env.mainUrl || 'http://localhost:3000/'
 
 router.get('/', (req, res) => {
-  console.log(hostUrl)
   res.render('index')
 })
 
